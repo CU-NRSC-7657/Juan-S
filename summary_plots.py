@@ -217,7 +217,7 @@ def single_cell_summary(path,probe,spike_data,unit,matrix_data,matrix_times,grat
     
     for num,j in enumerate(rf_outputs):
         grid_fig = rf_grid(j,title=rf_names[num])
-        grid_fig.savefig(os.path.join(image_path,'unit'+str(unit)+str(num)+'grid.svg'))
+        grid_fig.savefig(os.path.join(image_path,'unit'+str(unit)+'_'+str(num)+'grid.svg'))
         
     color_condition = []
     for x in range(gratings_data.shape[0]):
@@ -235,11 +235,11 @@ def single_cell_summary(path,probe,spike_data,unit,matrix_data,matrix_times,grat
         if k == 'color':
             if psth == 'lines':
                 #Generate PSTH for evoked response to green, uv, and combined color condition   
-                psth_color = psth_line_overlay(spike_data=units_df,unit=unit,stim_data=gratings_df,condition='color',
+                psth_color = psth_line_overlay(spike_data=units_df,probe=probe,unit=unit,stim_data=gratings_df,condition='color',
                                                title = 'Color Condition')
-                psth_green = psth_line_overlay(spike_data=units_df,unit=unit,stim_data=gratings_df,condition='green',
+                psth_green = psth_line_overlay(spike_data=units_df,probe=probe,unit=unit,stim_data=gratings_df,condition='green',
                                   title = 'Green')
-                psth_uv = psth_line_overlay(spike_data=units_df,unit=unit,stim_data=gratings_df,condition='uv',
+                psth_uv = psth_line_overlay(spike_data=units_df,probe=probe,unit=unit,stim_data=gratings_df,condition='uv',
                                   title = 'UV')
                 if save==True:
                     psth_color.savefig(os.path.join(image_path,'unit'+str(unit)+'_psthColor.svg'))
@@ -248,11 +248,11 @@ def single_cell_summary(path,probe,spike_data,unit,matrix_data,matrix_times,grat
 
 
             if psth == 'heatmap':
-                psth_color = psth_bars(spike_data=units_df, unit=unit,stim_data = gratings_df,condition='color',
+                psth_color = psth_bars(spike_data=units_df,probe=probe,unit=unit,stim_data = gratings_df,condition='color',
                           title = 'Color Condition')
-                psth_green = psth_bars(spike_data=units_df, unit=unit,stim_data = gratings_df,condition='green',
+                psth_green = psth_bars(spike_data=units_df,probe=probe, unit=unit,stim_data = gratings_df,condition='green',
                           title = 'Green')
-                psth_uv = psth_bars(spike_data=units_df, unit=unit,stim_data = gratings_df,condition='uv',
+                psth_uv = psth_bars(spike_data=units_df,probe=probe, unit=unit,stim_data = gratings_df,condition='uv',
                           title = 'UV')
                 if save==True:
                     psth_color.savefig(os.path.join(image_path,'unit'+str(unit)+'_psthColor.svg'))
@@ -261,21 +261,68 @@ def single_cell_summary(path,probe,spike_data,unit,matrix_data,matrix_times,grat
                 
         else:
             if psth == 'lines':
-                psth_ori = psth_line_overlay(spike_data = units_df, unit = unit, stim_data = gratings_df, condition='ori',
+                psth_ori = psth_line_overlay(spike_data = units_df,probe=probe, unit = unit, stim_data = gratings_df, condition='ori',
                                   title = 'Orientation')
-                psth_sf = psth_line_overlay(spike_data = units_df, unit = unit, stim_data = gratings_df, condition='SF',
+                psth_sf = psth_line_overlay(spike_data = units_df,probe=probe, unit = unit, stim_data = gratings_df, condition='SF',
                                   title = 'Spatial Frequency')
                 if save==True:
                     psth_ori.savefig(os.path.join(image_path,'unit'+str(unit)+'_psthOri'+k+'.svg'))
                     psth_sf.savefig(os.path.join(image_path,'unit'+str(unit)+'_psthSF'+k+'.svg'))
 
             if psth == 'heatmap':
-                psth_ori = psth_bars(spike_data = units_df, unit = unit, stim_data = gratings_df, condition='ori',
+                psth_ori = psth_bars(spike_data = units_df,probe=probe, unit = unit, stim_data = gratings_df, condition='ori',
                                   title = 'Orientation')
-                psth_sf = psth_bars(spike_data = units_df, unit = unit, stim_data = gratings_df, condition='SF',
+                psth_sf = psth_bars(spike_data = units_df,probe=probe, unit = unit, stim_data = gratings_df, condition='SF',
                                   title = 'Spatial Frequency')
                 if save==True:
                     psth_ori.savefig(os.path.join(image_path,'unit'+str(unit)+'_psthOri'+k+'.svg'))
                     psth_sf.savefig(os.path.join(image_path,'unit'+str(unit)+'_psthSF'+k+'.svg'))
     if save==True:
         print('Plots have been saved to '+image_path)
+
+
+#Far from done. Still needs a lot of work to properly format polished figure. 
+#TODO Arrange figure into panels with titles to denote each stimulus
+#TODO Add save option
+#TODO Engineer flexibility for different/missing stimuli
+def summary_plot(img_path,mouse_id,experiment,save=False):
+    images = glob(img_path+'\*.svg')
+#     images = glob(img_path+'\*.jpg')
+    receptive_fields=[]
+    gratings_color=[]
+    gratings_orientation=[]
+    gratings_green=[]
+    gratings_uv=[]
+    
+    for i in images:
+        if 'waveform' in i:
+            waveform = i
+        if 'grid' in i:
+            receptive_fields.append(i)
+        if 'psthColor' in i:
+            gratings_color.append(i)
+        if 'psthGreen' in i:
+            gratings_color.append(i)
+        if 'psthUV' in i:
+            gratings_color.append(i)
+        if '_ori' in i: 
+            gratings_orientation.append(i)
+        if '_green' in i:
+            gratings_green.append(i)
+        if '_uv' in i: 
+            gratings_uv.append(i)\
+            
+    sc.Figure('25cm','180cm',
+              sc.SVG(waveform),
+              sc.SVG(receptive_fields[0]),
+              sc.SVG(receptive_fields[1]),
+              sc.SVG(receptive_fields[2]),
+              sc.SVG(gratings_color[0]),
+              sc.SVG(gratings_color[1]),
+              sc.SVG(gratings_color[2]),
+              sc.SVG(gratings_orientation[0]),
+              sc.SVG(gratings_orientation[1]),
+              sc.SVG(gratings_green[0]),
+              sc.SVG(gratings_green[1]),
+              sc.SVG(gratings_uv[0]),
+              sc.SVG(gratings_uv[1])).tile(1,13)                 
