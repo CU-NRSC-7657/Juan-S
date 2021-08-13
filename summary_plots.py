@@ -76,7 +76,8 @@ def rf_grid(data, colormap ='viridis',interp='none',title='',nrows=5,ncols=2):
 
 #takes spike data and triggers and yields overlaid psth ribbon plots with variance
 #TODO add colormap options
-def psth_line_overlay(spike_data, unit, stim_data, condition, title='', pre=0.5, post=2.5,binsize=0.05,variance=True):
+def psth_line_overlay(spike_data, probe, unit, stim_data, condition, title='', pre=0.5, post=2.5,binsize=0.05,variance=True):
+    spike_data = spike_data[spike_data['probe']==probe]
     times = np.array(spike_data.times[unit])
     numbins = int((post+pre)/binsize)
     conds = np.unique(stim_data[condition])
@@ -126,7 +127,8 @@ def psth_line_overlay(spike_data, unit, stim_data, condition, title='', pre=0.5,
 #in Hz. These plots, while superior in organization and readability provide only a weak indication of baseline firing rate and lack display
 #of variance
 #TODO Add colormap options
-def psth_bars(spike_data,unit,stim_data,condition,title='',pre=0.5,post=2.5,binsize=0.05):
+def psth_bars(spike_data,probe,unit,stim_data,condition,title='',pre=0.5,post=2.5,binsize=0.05):
+    spike_data = spike_data[spike_data['probe']==probe]
     times = np.array(spike_data.times[unit])
     numbins = int((post+pre)/binsize)
     num_conds = len(np.unique(stim_data[condition]))
